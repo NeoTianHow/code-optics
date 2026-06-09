@@ -3,6 +3,7 @@
 *.err.log
 npm-debug.log*
 yarn-error.log*
+.codex-run-logs/
 
 # Environment and local secrets
 .env
