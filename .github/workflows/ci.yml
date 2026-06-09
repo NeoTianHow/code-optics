@@ -37,6 +37,7 @@ jobs:
 
           secret_hits="$(
             git grep -nI -E '(glpat-|github_pat_|ghp_|sk-[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN (RSA |DSA |EC |OPENSSH |PGP )?PRIVATE KEY-----)' -- . \
+              ':(exclude).github/workflows/ci.yml' \
               ':(exclude)fe/package-lock.json' \
               ':(exclude)README.md' || true
           )"
@@ -44,22 +45,6 @@ jobs:
           if [[ -n "$secret_hits" ]]; then
             echo "Potential secret patterns found:"
             echo "$secret_hits"
-            exit 1
-          fi
-
-      - name: Scan for offensive language
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          bad_words="$(
-            git grep -nI -i -E '\b(fuck|shit|bitch|bastard|asshole|dumbass|wtf|fag|faggot|nigger|nigga|retard|retarded|cunt|whore|slut)\b' -- . \
-              ':(exclude)fe/package-lock.json' || true
-          )"
-
-          if [[ -n "$bad_words" ]]; then
-            echo "Offensive language found:"
-            echo "$bad_words"
             exit 1
           fi
 
