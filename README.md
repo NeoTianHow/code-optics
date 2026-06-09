@@ -4,7 +4,7 @@ AI-driven GitLab repository analytics and code review automation for enterprise 
 
 ## Overview
 
-Code Optics is a full-stack dashboard that improves visibility and review efficiency across GitLab repositories. It was built for enterprise teams using self-hosted GitLab environments, where manual branch tracking and code reviews can become slow, repetitive, and prone to missed changes across hundreds of repositories.
+Code Optics is a full-stack dashboard that improves visibility and review efficiency across GitLab repositories. It was built for enterprise teams managing large GitLab workspaces, where manual branch tracking and code reviews can become slow, repetitive, and prone to missed changes across hundreds of repositories.
 
 The system helps teams navigate GitLab parent groups, subgroups, projects, and branches from one interface. It tracks branch activity and merge status, generates AI summaries for branch changes, creates consolidated PDF reports for selected projects, and triggers AI-assisted merge request reviews through GitLab webhooks.
 
