@@ -42,6 +42,18 @@ npm install
 npm start
 ```
 
+Tests:
+
+```bash
+cd be
+./mvnw test
+
+cd ../fe
+npm run test:ci
+npm run build
+npm audit --omit=dev
+```
+
 Optional Chroma service:
 
 ```bash
