@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  repo-safety:
+    name: Repository safety
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Block risky committed files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          risky_files="$(git ls-files | grep -Ei '(^|/)(\.env($|\.)|data/|reports/|target/|dist/|node_modules/|\.angular/|\.vscode/|old stuffs/)|\.(db|sqlite|sqlite3|log|zip|pdf|jar|class)$' || true)"
+
+          if [[ -n "$risky_files" ]]; then
+            echo "Risky files are committed and should be removed:"
+            echo "$risky_files"
+            exit 1
+          fi
+
+      - name: Scan for obvious secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          secret_hits="$(
+            git grep -nI -E '(glpat-|github_pat_|ghp_|sk-[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN (RSA |DSA |EC |OPENSSH |PGP )?PRIVATE KEY-----)' -- . \
+              ':(exclude)fe/package-lock.json' \
+              ':(exclude)README.md' || true
+          )"
+
+          if [[ -n "$secret_hits" ]]; then
+            echo "Potential secret patterns found:"
+            echo "$secret_hits"
+            exit 1
+          fi
+
+      - name: Scan for offensive language
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          bad_words="$(
+            git grep -nI -i -E '\b(fuck|shit|bitch|bastard|asshole|dumbass|wtf|fag|faggot|nigger|nigga|retard|retarded|cunt|whore|slut)\b' -- . \
+              ':(exclude)fe/package-lock.json' || true
+          )"
+
+          if [[ -n "$bad_words" ]]; then
+            echo "Offensive language found:"
+            echo "$bad_words"
+            exit 1
+          fi
+
+  backend-test:
+    name: Backend tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Run backend tests
+        working-directory: be
+        run: |
+          chmod +x ./mvnw
+          ./mvnw test
+
+  frontend-test:
+    name: Frontend tests and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: fe/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: fe
+        run: npm ci
+
+      - name: Run frontend tests
+        working-directory: fe
+        run: npm run test:ci
+
+      - name: Build frontend
+        working-directory: fe
+        run: npm run build
+
+      - name: Audit production dependencies
+        working-directory: fe
+        run: npm audit --omit=dev
