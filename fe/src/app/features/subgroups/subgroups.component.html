@@ -1,0 +1,156 @@
+<!-- subgroups.component.html -->
+<div class="container">
+  <!-- Breadcrumbs Section -->
+  <div class="breadcrumb-container">
+    <app-breadcrumb [items]="breadcrumbs"></app-breadcrumb>
+  </div>
+
+  <!-- Page Title and Custom Rules Button -->
+  <div class="header-section">
+    <h1 class="page-title">Sub Group Overview</h1>
+    <button mat-flat-button color="primary" (click)="onViewCustomRules()">
+      View Custom Code Rules
+    </button>
+  </div>
+
+  <div *ngIf="!isLoading && error" class="error-banner">
+    <div class="error-content">
+      <img src="/icons/error.png" alt="Error" class="icon" />
+      <span>{{ error }}</span>
+    </div>
+  </div>
+
+  <!-- Search Section -->
+  <div class="search-section">
+    <mat-form-field class="subgroup-filter-input" appearance="outline">
+      <input
+        matInput
+        [formControl]="searchControl"
+        placeholder="Search or filter subgroups..."
+        (keyup)="onSearchKeyup($event)"
+      />
+      <div matSuffix class="search-icon-container">
+        <img
+          src="/icons/search.png"
+          alt="Search"
+          (click)="onSearch()"
+          class="icon"
+        />
+      </div>
+    </mat-form-field>
+  </div>
+
+  <div class="table-container">
+    <!-- Loading Overlay -->
+    <div *ngIf="isLoading" class="table-overlay">
+      <mat-spinner [diameter]="40"></mat-spinner>
+    </div>
+
+    <!-- No Records Message -->
+    <div
+      *ngIf="!isLoading && (!dataSource.data || dataSource.data.length === 0)"
+      class="table-overlay"
+    >
+      <div class="no-records-message">No subgroups found</div>
+    </div>
+
+    <!-- Table -->
+    <table mat-table [dataSource]="isLoading ? [] : dataSource">
+      <!-- Checkbox Column -->
+      <ng-container matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-checkbox
+            class="table-checkbox"
+            (change)="$event ? toggleAllRows() : null"
+            [checked]="selection.hasValue() && isAllSelected()"
+            [indeterminate]="selection.hasValue() && !isAllSelected()"
+            [aria-label]="checkboxLabel()"
+          >
+          </mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let row">
+          <mat-checkbox
+            class="table-checkbox"
+            (click)="$event.stopPropagation()"
+            (change)="$event ? selection.toggle(row) : null"
+            [checked]="selection.isSelected(row)"
+            [aria-label]="checkboxLabel(row)"
+          >
+          </mat-checkbox>
+        </td>
+      </ng-container>
+
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Subgroup Name</th>
+        <td mat-cell *matCellDef="let element">
+          <a
+            href="{{ element.web_url }}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {{ element.name }}
+          </a>
+        </td>
+      </ng-container>
+
+      <!-- Project Count Column -->
+      <ng-container matColumnDef="projectCount">
+        <th mat-header-cell *matHeaderCellDef>Total Projects</th>
+        <td mat-cell *matCellDef="let element">{{ element.projectCount }}</td>
+      </ng-container>
+
+      <!-- Last Activity Column -->
+      <ng-container matColumnDef="lastActivity">
+        <th mat-header-cell *matHeaderCellDef>Last Updated Project</th>
+        <td mat-cell *matCellDef="let element">
+          <ng-container
+            *ngIf="
+              element.mostRecentProjectName && element.lastActivityAt;
+              else noActivity
+            "
+          >
+            {{ element.mostRecentProjectName }} ({{ element.lastActivityAt }})
+          </ng-container>
+          <ng-template #noActivity> - </ng-template>
+        </td>
+      </ng-container>
+
+      <!-- Action Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let element">
+          <button
+            mat-flat-button
+            color="primary"
+            (click)="onViewProjects(element.id, element.name)"
+          >
+            <div class="button-content">
+              <span>View Projects</span>
+            </div>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: displayedColumns"
+        class="summary-row"
+      ></tr>
+    </table>
+
+    <!-- Paginator -->
+    <mat-paginator
+      *ngIf="!isLoading"
+      [length]="totalItems"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [pageIndex]="pageIndex"
+      (page)="handlePageEvent($event)"
+      showFirstLastButtons
+      aria-label="Select page of subgroups"
+    >
+    </mat-paginator>
+  </div>
+</div>

@@ -1,0 +1,214 @@
+*:not(mat-icon) {
+  font-family: "Poppins", sans-serif;
+}
+
+.search-section {
+  width: 70%;
+  margin: 1.5rem auto;
+}
+
+.page-title {
+  width: 70%;
+  margin: 0;
+  font-size: 28px;
+  font-weight: 500;
+}
+
+.breadcrumb-container {
+  width: 100%;
+  margin: 1rem auto;
+}
+
+.group-filter-input {
+  width: 100%;
+  --mat-form-field-container-height: 48px;
+  --mat-form-field-container-vertical-padding: 10px;
+  --mdc-outlined-text-field-outline-width: 1.3px;
+  --mdc-outlined-text-field-outline-color: rgba(0, 0, 0, 0.37);
+  --mdc-outlined-text-field-focus-outline-color: rgba(0, 0, 0, 0.87);
+  --mdc-outlined-text-field-hover-outline-color: rgba(0, 0, 0, 0.87);
+  --mdc-outlined-text-field-container-shape: 0.5rem;
+}
+
+::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  display: none !important;
+}
+
+// Override Material's suffix styles
+:host ::ng-deep {
+  .mat-mdc-form-field-icon-suffix {
+    align-self: stretch !important;
+    align-items: stretch !important;
+  }
+}
+
+.search-icon-container {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  border-left: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 0 12px;
+  cursor: pointer;
+
+  .icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    opacity: 0.6;
+  }
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 20px;
+
+  .table-container {
+    position: relative;
+    min-height: 200px;
+    width: 70%;
+  }
+
+  .table-overlay {
+    position: absolute;
+    top: 70%; /* Adjust this percentage to move the spinner down */
+    left: 50%;
+    right: 0;
+    bottom: 0;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    border-radius: 0.5rem;
+  }
+
+  .no-records-message {
+    font-size: 1.2em;
+    color: #4a5568;
+    text-align: center;
+  }
+
+  .mat-mdc-table {
+    width: 100%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+    overflow: hidden;
+  }
+
+  .mat-mdc-header-row {
+    border-bottom-width: 0px;
+    border-bottom-color: #e5e7eb;
+    border-bottom-style: solid;
+    background-color: #f9fafb;
+    font-weight: 550;
+    color: #4a5568;
+    letter-spacing: 0.05em;
+  }
+
+  .mat-mdc-header-cell {
+    padding: 1rem;
+    white-space: normal;
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .mat-mdc-cell {
+    padding: 1rem;
+  }
+}
+
+// Column widths
+.mat-column-select {
+  width: 0%;
+}
+.mat-column-name {
+  width: 31%;
+}
+.mat-column-subGroupCount {
+  width: 15%;
+}
+.mat-column-lastActivity {
+  width: 33%;
+}
+.mat-column-actions {
+  width: 17%;
+}
+
+// Checkbox styling
+.table-checkbox {
+  --mdc-checkbox-selected-checkmark-color: #15803d;
+  --mdc-checkbox-selected-focus-icon-color: #dcfce7;
+  --mdc-checkbox-selected-hover-icon-color: #dcfce7;
+  --mdc-checkbox-selected-icon-color: #dcfce7;
+}
+
+.mat-mdc-checkbox-ripple,
+.mdc-checkbox__ripple {
+  display: none;
+}
+
+.mdc-checkbox__checkmark {
+  border: 2px solid #15803d;
+}
+
+// Paginator styling
+.mat-mdc-paginator {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.mat-mdc-paginator-outer-container {
+  background: transparent;
+}
+
+.error-banner {
+  width: 70%;
+  padding: 16px 0;
+  margin: 16px 0;
+  background-color: #fde8e8; /* Light red background */
+  border: 1px solid #f5c6cb; /* Border matching the theme */
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center the text */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+  font-family: Arial, sans-serif; /* Ensure font consistency */
+  color: #b71c1c; /* Dark red text */
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.error-content {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Add space between the icon and text */
+}
+
+.icon {
+  color: #b71c1c;
+  height: 1.6rem;
+}
+
+a {
+  color: #3b82f6;
+  text-decoration: none;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+
+  &:visited {
+    color: #3b82f6;
+  }
+
+  &:active {
+    color: #104685;
+  }
+}

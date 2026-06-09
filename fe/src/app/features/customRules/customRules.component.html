@@ -1,0 +1,139 @@
+<div class="container">
+  <!-- Breadcrumbs Section -->
+  <div class="breadcrumb-container">
+    <app-breadcrumb [items]="breadcrumbs"></app-breadcrumb>
+  </div>
+
+  <!-- Page Title and Add Button -->
+  <div class="header-section">
+    <h1 class="page-title">Custom Code Review Rules</h1>
+    <button mat-flat-button color="primary" (click)="openAddDialog()">
+      Add New Rule
+    </button>
+  </div>
+
+  <!-- Error Banner -->
+  <div *ngIf="!isLoading && error" class="error-banner">
+    <div class="error-content">
+      <img src="/icons/error.png" alt="Error" class="icon" />
+      <span>{{ error }}</span>
+    </div>
+  </div>
+
+  <!-- Search Section -->
+  <div class="search-section">
+    <mat-form-field class="rule-filter-input" appearance="outline">
+      <input
+        matInput
+        [formControl]="searchControl"
+        placeholder="Search rules..."
+        (keyup)="onSearchKeyup($event)"
+      />
+      <div matSuffix class="search-icon-container">
+        <img
+          src="/icons/search.png"
+          alt="Search"
+          (click)="onSearch()"
+          class="icon"
+        />
+      </div>
+    </mat-form-field>
+  </div>
+
+  <div class="table-container">
+    <!-- Loading Overlay -->
+    <div *ngIf="isLoading" class="table-overlay">
+      <mat-spinner [diameter]="40"></mat-spinner>
+    </div>
+
+    <!-- No Records Message -->
+    <div
+      *ngIf="!isLoading && (!dataSource.data || dataSource.data.length === 0)"
+      class="table-overlay"
+    >
+      <div class="no-records-message">No custom rules found</div>
+    </div>
+
+    <!-- Table -->
+    <table mat-table [dataSource]="isLoading ? [] : dataSource">
+      <!-- Description Column -->
+      <ng-container matColumnDef="description">
+        <th mat-header-cell *matHeaderCellDef>Description</th>
+        <td mat-cell *matCellDef="let element">{{ element.description }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef>Category</th>
+        <td mat-cell *matCellDef="let element">
+          <div [ngClass]="'category-badge-' + element.category.toLowerCase()">
+            {{
+              element.category === "FE"
+                ? "Frontend"
+                : element.category === "BE"
+                ? "Backend"
+                : "Service"
+            }}
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Severity Column -->
+      <ng-container matColumnDef="severity">
+        <th mat-header-cell *matHeaderCellDef>Severity</th>
+        <td mat-cell *matCellDef="let element">
+          <div [ngClass]="'status-badge-' + element.severity.toLowerCase()">
+            {{ element.severity }}
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Enabled Column -->
+      <ng-container matColumnDef="enabled">
+        <th mat-header-cell *matHeaderCellDef>Enabled</th>
+        <td mat-cell *matCellDef="let element">
+          <mat-slide-toggle
+            [checked]="element.enabled"
+            disabled="true"
+            color="primary"
+          >
+          </mat-slide-toggle>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let element">
+          <div class="action-buttons">
+            <button mat-flat-button color="primary" (click)="editRule(element)">
+              Edit
+            </button>
+            <button
+              mat-flat-button
+              color="warn"
+              (click)="deleteRule(element.id)"
+            >
+              Delete
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+
+    <!-- Paginator -->
+    <mat-paginator
+      *ngIf="!isLoading"
+      [length]="totalItems"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [pageIndex]="pageIndex"
+      (page)="handlePageEvent($event)"
+      showFirstLastButtons
+      aria-label="Select page of rules"
+    >
+    </mat-paginator>
+  </div>
+</div>

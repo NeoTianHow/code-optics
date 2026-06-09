@@ -1,0 +1,253 @@
+<div class="container">
+  <!-- Breadcrumbs Section -->
+  <div class="breadcrumb-container">
+    <app-breadcrumb [items]="breadcrumbs"></app-breadcrumb>
+  </div>
+
+  <!-- Page Title -->
+  <h1 class="page-title">Branch Overview</h1>
+  <div *ngIf="!isLoading && error" class="error-banner">
+    <div class="error-content">
+      <img src="/icons/error.png" alt="Error" class="icon" />
+      <span>{{ error }}</span>
+    </div>
+  </div>
+
+  <!-- Search Section -->
+  <div class="search-section">
+    <mat-form-field class="branch-filter-input" appearance="outline">
+      <input
+        matInput
+        [formControl]="searchControl"
+        placeholder="Search or filter branches..."
+        (keyup)="onSearchKeyup($event)"
+      />
+      <div matSuffix class="search-icon-container">
+        <img
+          src="/icons/search.png"
+          alt="Search"
+          (click)="onSearch()"
+          class="icon"
+        />
+      </div>
+    </mat-form-field>
+  </div>
+
+  <div class="table-container">
+    <!-- Loading Overlay -->
+    <div *ngIf="isLoading" class="table-overlay">
+      <mat-spinner [diameter]="40"></mat-spinner>
+    </div>
+
+    <!-- No Records Message -->
+    <div
+      *ngIf="!isLoading && (!dataSource.data || dataSource.data.length === 0)"
+      class="table-overlay"
+    >
+      <div class="no-records-message">No branches found</div>
+    </div>
+
+    <!-- Table -->
+    <table
+      mat-table
+      [dataSource]="isLoading ? [] : dataSource"
+      multiTemplateDataRows
+    >
+      <!-- Expand Column -->
+      <ng-container matColumnDef="expand">
+        <th mat-header-cell *matHeaderCellDef aria-label="row actions">
+          &nbsp;
+        </th>
+        <td mat-cell *matCellDef="let element">
+          <button
+            mat-icon-button
+            aria-label="expand row"
+            (click)="toggleRow(element); $event.stopPropagation()"
+          >
+            <img
+              [src]="
+                isRowExpanded(element)
+                  ? '/icons/keyboard_arrow_up.png'
+                  : '/icons/keyboard_arrow_down.png'
+              "
+              [alt]="isRowExpanded(element) ? 'Collapse' : 'Expand'"
+              class="expand-icon"
+            />
+          </button>
+        </td>
+      </ng-container>
+
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Branch Name</th>
+        <td mat-cell *matCellDef="let element">
+          <div class="branch-name-container">
+            <a
+              href="{{ element.web_url }}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {{ element.name }}
+            </a>
+
+            <span
+              *ngIf="element.needsUpdate"
+              class="update-indicator"
+              matTooltip="New changes detected or summary not generated. Please generate the summary."
+              matTooltipPosition="above"
+            >
+              <img src="/icons/warning.png" alt="Warning" class="icon" />
+            </span>
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="compareAgainst">
+        <th mat-header-cell *matHeaderCellDef>Compare Against</th>
+        <td mat-cell *matCellDef="let element">
+          <div class="compare-select-container">
+            <mat-form-field appearance="outline" class="compare-select">
+              <mat-select
+                [value]="element.comparingAgainst"
+                (selectionChange)="onCompareChange(element, $event.value)"
+                [disabled]="element.compareLoading"
+              >
+                <mat-option
+                  *ngFor="let branch of getAvailableBranches(element.name)"
+                  [value]="branch"
+                >
+                  {{ branch }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-spinner
+              *ngIf="element.compareLoading"
+              [diameter]="20"
+              class="compare-spinner"
+            >
+            </mat-spinner>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Merge Status Column -->
+      <ng-container matColumnDef="mergeStatus">
+        <th mat-header-cell *matHeaderCellDef>Merge Status</th>
+        <td mat-cell *matCellDef="let element">
+          <ng-container *ngIf="element.merged; else unmerged">
+            <div
+              class="status-badge-merged"
+              [matTooltip]="
+                element.mergedBy ? 'Merged by ' + element.mergedBy : 'Merged'
+              "
+              matTooltipPosition="above"
+            >
+              Merged
+            </div>
+          </ng-container>
+          <ng-template #unmerged>
+            <div class="status-badge-unmerged">Unmerged</div>
+          </ng-template>
+        </td>
+      </ng-container>
+
+      <!-- Activity Status Column -->
+      <ng-container matColumnDef="activityStatus">
+        <th mat-header-cell *matHeaderCellDef>Activity Status</th>
+        <td mat-cell *matCellDef="let element">
+          <ng-container *ngIf="element.active; else stale">
+            <div class="status-badge-active">Active</div>
+          </ng-container>
+          <ng-template #stale>
+            <div class="status-badge-stale">Stale</div>
+          </ng-template>
+        </td>
+      </ng-container>
+
+      <!-- Last Commit Date Column -->
+      <ng-container matColumnDef="lastCommitDate">
+        <th mat-header-cell *matHeaderCellDef>Last Commit Date</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.commit.committedDate }}
+          <br *ngIf="element.commit.authorName" />
+          <span *ngIf="element.commit.authorName">
+            (Author: {{ element.commit.authorName }})
+          </span>
+          <br *ngIf="element.commit.committerName" />
+          <span *ngIf="element.commit.committerName">
+            (Committer: {{ element.commit.committerName }})
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let element">
+          <button
+            mat-flat-button
+            color="primary"
+            (click)="onGenerateSummary(element)"
+            [disabled]="generatingBranchName === element.name"
+          >
+            <mat-spinner
+              *ngIf="generatingBranchName === element.name"
+              [diameter]="20"
+              [strokeWidth]="2"
+              class="button-spinner"
+            ></mat-spinner>
+            <span *ngIf="generatingBranchName !== element.name">Summary</span>
+          </button>
+        </td>
+      </ng-container>
+
+      <!-- Expanded detail row -->
+      <ng-container matColumnDef="expandedDetail">
+        <td
+          mat-cell
+          *matCellDef="let element"
+          [attr.colspan]="displayedColumns.length"
+        >
+          <div
+            class="summary-detail"
+            [@detailExpand]="isRowExpanded(element) ? 'expanded' : 'collapsed'"
+          >
+            <div class="summary-detail-wrapper">
+              <div
+                class="summary-description"
+                [innerHTML]="element.detailedSummary | markdown"
+              ></div>
+            </div>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Regular Table Row -->
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: displayedColumns"
+        class="summary-row"
+      ></tr>
+
+      <tr
+        mat-row
+        *matRowDef="let row; columns: ['expandedDetail']"
+        class="summary-detail-row"
+      ></tr>
+    </table>
+
+    <!-- Paginator -->
+    <mat-paginator
+      *ngIf="!isLoading"
+      [length]="totalItems"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [pageIndex]="pageIndex"
+      (page)="handlePageEvent($event)"
+      showFirstLastButtons
+      aria-label="Select page of branches"
+    >
+    </mat-paginator>
+  </div>
+</div>

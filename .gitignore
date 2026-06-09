@@ -1,0 +1,50 @@
+# Logs
+*.log
+*.err.log
+npm-debug.log*
+yarn-error.log*
+
+# Environment and local secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+
+# Local databases and generated data
+data/
+**/data/
+*.db
+*.sqlite
+*.sqlite3
+*.trace.db
+*.mv.db
+*.lock.db
+
+# Generated reports and archives
+reports/
+*.pdf
+*.zip
+*.tar
+*.tar.gz
+
+# Build outputs
+target/
+dist/
+out/
+build/
+coverage/
+.angular/cache/
+node_modules/
+
+# IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Scratch or legacy local folders
+**/old stuffs/

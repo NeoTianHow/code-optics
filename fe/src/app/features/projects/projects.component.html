@@ -1,0 +1,250 @@
+<div class="container">
+  <!-- Breadcrumbs Section -->
+  <div class="breadcrumb-container">
+    <app-breadcrumb [items]="breadcrumbs"></app-breadcrumb>
+  </div>
+
+  <!-- Page Title and Generate Report Button Row -->
+  <div class="title-action-row">
+    <h1 class="page-title">Project Overview</h1>
+
+    <!-- Error Banner -->
+    <div *ngIf="!isLoading && error" class="error-banner">
+      <div class="error-content">
+        <img src="/icons/error.png" alt="Error" class="icon" />
+        <span>{{ error }}</span>
+      </div>
+    </div>
+
+    <!-- Report Generation Button - Now at the same level as title -->
+    <div class="title-level-actions" *ngIf="selection.selected.length > 0">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="generateSelectedReport()"
+        [disabled]="generatingReport"
+      >
+        <span *ngIf="!generatingReport"
+          >Generate Report for Selected Projects</span
+        >
+        <span *ngIf="generatingReport">
+          <mat-spinner [diameter]="20" class="button-spinner"></mat-spinner>
+          Generating...
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Active Reports Section -->
+  <div class="reports-section" *ngIf="activeReports.size > 0">
+    <h3 class="section-title">Active Reports</h3>
+
+    <mat-card
+      *ngFor="let report of activeReports | keyvalue"
+      class="report-card"
+    >
+      <mat-card-content>
+        <div class="report-header">
+          <div
+            class="status-badge"
+            [ngClass]="report.value.status.toLowerCase()"
+          >
+            <img
+              [src]="
+                '/icons/' +
+                (report.value.status === 'COMPLETED'
+                  ? 'check_circle'
+                  : report.value.status === 'FAILED'
+                  ? 'error'
+                  : 'hourglass_empty') +
+                '.png'
+              "
+              alt="{{ report.value.status }}"
+              class="status-icon"
+            />
+            <span>{{ report.value.status }}</span>
+          </div>
+        </div>
+
+        <div class="report-dates" *ngIf="report.value.formattedStartTime">
+          <div class="date-item">
+            <span class="date-label">Started:</span>
+            <span class="date-value">{{
+              report.value.formattedStartTime
+            }}</span>
+          </div>
+
+          <div class="date-item" *ngIf="report.value.formattedCompletedTime">
+            <span class="date-label">Completed:</span>
+            <span class="date-value">{{
+              report.value.formattedCompletedTime
+            }}</span>
+          </div>
+        </div>
+
+        <!-- Simple message for in-progress reports instead of progress bar -->
+        <div
+          class="processing-message"
+          *ngIf="
+            report.value.status === 'PROCESSING' ||
+            report.value.status === 'PENDING'
+          "
+        >
+          {{ report.value.currentStep || "Processing report, please wait..." }}
+        </div>
+
+        <!-- Error message if needed -->
+        <div class="error-message" *ngIf="report.value.error">
+          <mat-icon color="warn">warning</mat-icon>
+          <span>{{ report.value.error }}</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Search Section -->
+  <div class="search-section">
+    <mat-form-field class="project-filter-input" appearance="outline">
+      <input
+        matInput
+        [formControl]="searchControl"
+        placeholder="Search or filter projects..."
+        (keyup)="onSearchKeyup($event)"
+      />
+      <div matSuffix class="search-icon-container">
+        <img
+          src="/icons/search.png"
+          alt="Search"
+          (click)="onSearch()"
+          class="icon"
+        />
+      </div>
+    </mat-form-field>
+  </div>
+
+  <div class="table-container">
+    <!-- Loading Overlay -->
+    <div *ngIf="isLoading" class="table-overlay">
+      <mat-spinner [diameter]="40"></mat-spinner>
+    </div>
+
+    <!-- No Records Message -->
+    <div
+      *ngIf="!isLoading && (!dataSource.data || dataSource.data.length === 0)"
+      class="table-overlay"
+    >
+      <div class="no-records-message">No records found</div>
+    </div>
+
+    <!-- Table -->
+    <table mat-table [dataSource]="isLoading ? [] : dataSource">
+      <!-- Checkbox Column -->
+      <ng-container matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-checkbox
+            class="table-checkbox"
+            (change)="$event ? toggleAllRows() : null"
+            [checked]="selection.hasValue() && isAllSelected()"
+            [indeterminate]="selection.hasValue() && !isAllSelected()"
+            [aria-label]="checkboxLabel()"
+          >
+          </mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let row">
+          <mat-checkbox
+            class="table-checkbox"
+            (click)="$event.stopPropagation()"
+            (change)="$event ? selection.toggle(row) : null"
+            [checked]="selection.isSelected(row)"
+            [aria-label]="checkboxLabel(row)"
+          >
+          </mat-checkbox>
+        </td>
+      </ng-container>
+
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Project Name</th>
+        <td mat-cell *matCellDef="let element">
+          <a
+            href="{{ element.web_url }}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {{ element.name }}
+          </a>
+        </td>
+      </ng-container>
+
+      <!-- Active Branches Column -->
+      <ng-container matColumnDef="activeBranches">
+        <th mat-header-cell *matHeaderCellDef>Active Branches</th>
+        <td mat-cell *matCellDef="let element">{{ element.activeBranches }}</td>
+      </ng-container>
+
+      <!-- Stale Branches Column -->
+      <ng-container matColumnDef="staleBranches">
+        <th mat-header-cell *matHeaderCellDef>Stale Branches</th>
+        <td mat-cell *matCellDef="let element">{{ element.staleBranches }}</td>
+      </ng-container>
+
+      <!-- Merged Branches Column -->
+      <ng-container matColumnDef="mergedBranches">
+        <th mat-header-cell *matHeaderCellDef>Merged Branches</th>
+        <td mat-cell *matCellDef="let element">{{ element.mergedBranches }}</td>
+      </ng-container>
+
+      <!-- Unmerged Branches Column -->
+      <ng-container matColumnDef="unmergedBranches">
+        <th mat-header-cell *matHeaderCellDef>Unmerged Branches</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.unmergedBranches }}
+        </td>
+      </ng-container>
+
+      <!-- Last Activity At Column -->
+      <ng-container matColumnDef="lastActivityAt">
+        <th mat-header-cell *matHeaderCellDef>Last Activity At</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.lastActivityAt }}
+          <br />
+          <span *ngIf="element.mostRecentBranchName">
+            (Branch: {{ element.mostRecentBranchName }})
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let element">
+          <button
+            mat-flat-button
+            color="primary"
+            (click)="onViewBranches(element)"
+          >
+            View Branches
+          </button>
+        </td>
+      </ng-container>
+
+      <!-- Header and Empty Body -->
+      <tr mat-header-row *matHeaderRowDef="tableColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: tableColumns"></tr>
+    </table>
+
+    <!-- Paginator -->
+    <mat-paginator
+      *ngIf="!isLoading"
+      [length]="totalItems"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [pageIndex]="pageIndex"
+      (page)="handlePageEvent($event)"
+      showFirstLastButtons
+      aria-label="Select
+      page of projects"
+    >
+    </mat-paginator>
+  </div>
+</div>

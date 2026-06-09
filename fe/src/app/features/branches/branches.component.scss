@@ -1,0 +1,390 @@
+*:not(mat-icon) {
+  font-family: "Poppins", sans-serif;
+}
+
+.search-section {
+  width: 70%;
+  margin: 1.5rem auto;
+}
+
+.page-title {
+  width: 70%;
+  margin: 0;
+  font-size: 28px;
+  font-weight: 500;
+}
+
+.breadcrumb-container {
+  width: 100%;
+  margin: 1rem auto;
+}
+
+.branch-filter-input {
+  width: 100%;
+  --mat-form-field-container-height: 48px;
+  --mat-form-field-container-vertical-padding: 10px;
+  --mdc-outlined-text-field-outline-width: 1.3px;
+  --mdc-outlined-text-field-outline-color: rgba(0, 0, 0, 0.37);
+  --mdc-outlined-text-field-focus-outline-color: rgba(0, 0, 0, 0.87);
+  --mdc-outlined-text-field-hover-outline-color: rgba(0, 0, 0, 0.87);
+  --mdc-outlined-text-field-container-shape: 0.5rem;
+}
+
+::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  display: none !important;
+}
+
+// Override Material's suffix styles
+:host ::ng-deep {
+  .mat-mdc-form-field-icon-suffix {
+    align-self: stretch !important;
+    align-items: stretch !important;
+  }
+}
+
+.search-icon-container {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  border-left: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 0 12px;
+  cursor: pointer;
+
+  .icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    opacity: 0.6;
+  }
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 20px;
+
+  .table-container {
+    position: relative;
+    min-height: 200px;
+    width: 70%;
+  }
+
+  .table-overlay {
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    right: 0;
+    bottom: 0;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    border-radius: 0.5rem;
+  }
+
+  .no-records-message {
+    font-size: 1.2em;
+    color: #4a5568;
+    text-align: center;
+  }
+
+  .mat-mdc-table {
+    width: 100%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+    overflow: hidden;
+  }
+
+  .mat-mdc-header-row {
+    border-bottom-width: 0px;
+    border-bottom-color: #e5e7eb;
+    border-bottom-style: solid;
+    background-color: #f9fafb;
+    font-weight: 550;
+    color: #4a5568;
+    letter-spacing: 0.05em;
+  }
+
+  .mat-mdc-header-cell {
+    padding: 1rem;
+    white-space: normal;
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .mat-mdc-cell {
+    padding: 1rem;
+  }
+}
+
+// Column widths
+
+.mat-column-expand {
+  width: 0%;
+}
+
+.mat-column-name {
+  width: 20%;
+}
+.mat-column-compareAgainst {
+  width: 10%;
+}
+.mat-column-activityStatus {
+  width: 10%;
+}
+.mat-column-mergeStatus {
+  width: 10%;
+}
+.mat-column-lastCommitDate {
+  width: 20%;
+}
+.mat-column-actions {
+  width: 15%;
+}
+
+.branch-name-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.update-indicator {
+  display: flex;
+  align-items: center;
+
+  .icon {
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+  }
+}
+
+.expand-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+}
+
+/* Optional: Add hover effect */
+button:hover .expand-icon {
+  opacity: 0.8;
+}
+
+// Status badges
+.status-badge {
+  width: 100px;
+  border-radius: 6px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  box-sizing: border-box;
+  &::before {
+    content: "";
+    width: 4px;
+    height: 4px;
+    border-radius: 100%;
+    display: block;
+  }
+}
+
+.status-badge-merged {
+  @extend .status-badge;
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #15803d;
+  &::before {
+    background: #15803d;
+  }
+}
+
+.status-badge-unmerged {
+  @extend .status-badge;
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #b91c1c;
+  &::before {
+    background: #b91c1c;
+  }
+}
+
+.status-badge-stale {
+  @extend .status-badge;
+  background: #fefce8;
+  color: #8a551c;
+  border: 1px solid #8a551c;
+  &::before {
+    background: #8a551c;
+  }
+}
+
+.status-badge-active {
+  @extend .status-badge;
+  background: rgb(240, 246, 253);
+  color: #1b49ae;
+  border: 1px solid #2563eb;
+  &::before {
+    background: #2563eb;
+  }
+}
+
+// Checkbox styling
+.table-checkbox {
+  --mdc-checkbox-selected-checkmark-color: #15803d;
+  --mdc-checkbox-selected-focus-icon-color: #dcfce7;
+  --mdc-checkbox-selected-hover-icon-color: #dcfce7;
+  --mdc-checkbox-selected-icon-color: #dcfce7;
+}
+
+.mat-mdc-checkbox-ripple,
+.mdc-checkbox__ripple {
+  display: none;
+}
+
+.mdc-checkbox__checkmark {
+  border: 2px solid #15803d;
+}
+
+// Paginator styling
+.mat-mdc-paginator {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.mat-mdc-paginator-outer-container {
+  background: transparent;
+}
+
+// Error banner
+.error-banner {
+  width: 70%;
+  padding: 16px 0;
+  margin: 16px 0;
+  background-color: #fde8e8;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+  color: #b71c1c;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.error-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon {
+  color: #b71c1c;
+  height: 1.6rem;
+}
+
+.button-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.button-spinner {
+  margin-right: 4px;
+}
+
+// Make the spinner white to match button text
+::ng-deep .button-spinner circle {
+  stroke: #ffffff;
+}
+
+tr.summary-detail-row {
+  height: 0;
+}
+
+.summary-detail-row td {
+  padding: 0 !important; // Override default padding
+}
+
+.summary-detail-row .mat-column-expandedDetail {
+  padding: 0;
+}
+
+.summary-detail {
+  overflow: hidden;
+  width: 100%;
+}
+
+.summary-detail-wrapper {
+  padding: 16px 32px; // Add consistent padding around the content
+  background-color: #fafafa; // Optional: different background for expanded section
+  width: 96.5%;
+}
+
+.summary-row td {
+  border-bottom-width: 0;
+}
+
+.summary-description {
+  width: 100%; /* Maintain full width within its column */
+  height: 100%;
+  max-height: 500px;
+  overflow-y: auto;
+  line-height: 1.6;
+  color: #333;
+
+  p {
+    margin: 0.5em 0;
+  }
+}
+
+// Ensure the expanded row takes full width
+.mat-column-expandedDetail {
+  padding: 0 !important;
+  border-bottom: none;
+}
+
+// Remove bottom border from row above expanded content
+.expanded-row {
+  td {
+    border-bottom: none;
+  }
+}
+
+a {
+  color: #3b82f6;
+  text-decoration: none;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+
+  &:visited {
+    color: #3b82f6;
+  }
+
+  &:active {
+    color: #104685;
+  }
+}
+
+.mat-mdc-select {
+  font-size: 14px; /* Match table text size */
+  width: 100%;
+}
+
+.mat-mdc-option {
+  font-size: 12px; /* Match dropdown options text */
+}
