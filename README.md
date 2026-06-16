@@ -22,7 +22,7 @@ The AI features are designed for security-conscious environments by using Ollama
 - AI-assisted merge request review through GitLab webhooks.
 - Custom code review rules by parent group and project category, such as frontend, backend, and service rules.
 - Diff preprocessing and chunking for large merge request reviews.
-- Optional Chroma vector database service for feedback-filtering experiments.
+- Optional Chroma vector database service for feedback filtering.
 
 ## Screenshots
 
@@ -90,6 +90,20 @@ Tools and services:
 The Angular frontend provides the dashboard, search, pagination, branch comparison controls, custom rule management, and report status UI. The Spring Boot backend retrieves GitLab data, enriches it with branch status metrics, stores branch summaries and custom rules in H2, calls Ollama for AI summaries/reviews, and generates PDF reports with JasperReports.
 
 For merge request automation, GitLab sends webhook events to the backend. The backend verifies the webhook secret, fetches merge request diffs, applies custom rules, prompts Qwen 2.5 Coder, and posts review comments back to the merge request.
+
+## Feedback Filtering with ChromaDB
+
+Feedback filtering improves AI-assisted merge request reviews by learning from developer reactions. It adds a lightweight feedback loop that helps Code Optics avoid posting review comments similar to ones developers previously downvoted, while preserving comments that received positive feedback. The approach was inspired by the feedback-search pattern described in Tribe AI's [Lessons from 27 Months Building LLM Coding Agents](https://www.tribe.ai/applied-ai/lessons-from-27-months-building-llm-coding-agents).
+
+In Code Optics, AI review comments can receive GitLab emoji feedback, such as thumbs up or thumbs down. A thumbs down indicates that reviewers found the comment unhelpful, and feedback filtering prevents similar unhelpful messages from repeatedly surfacing in future merge request reviews. `FeedbackFilterService` reads those reactions after a merge request is completed, extracts the AI review comment text, vectorizes that text with an embedding model, and stores it in the Chroma vector store with metadata such as feedback type, project ID, merge request IID, and timestamp.
+
+![Feedback reaction example](docs/assets/feedback/feedback-reaction-example.png)
+
+When a new AI review comment is proposed, the same comment text is vectorized and searched against previously downvoted comments in ChromaDB. The vector search uses cosine similarity to find semantically similar feedback. A comment can be blocked when at least three downvoted comments are found above the 0.85 similarity threshold. This reduces repeated low-value review comments without needing to fine-tune the model.
+
+![Feedback filtering flow](docs/assets/feedback/feedback-filtering.png)
+
+The system uses Chroma as the vector database because it can run locally through Docker Compose and fits the project's internal-network deployment model. Chroma settings are documented in `application.properties`, and the Chroma container is available through `compose.yaml`.
 
 ## Getting Started
 
@@ -194,7 +208,7 @@ The capstone evaluation reported the following outcomes:
 - 46 user acceptance test cases were executed with real GitLab data in a deployed test environment.
 - Developer feedback found the branch summaries clear and useful, with most participants reporting time savings.
 - API optimization reduced dashboard response times to under 3 seconds during concurrent-user load testing.
-- Feedback-filtering experiments improved review signal quality by increasing high-value comments from 30% to 80%.
+- Feedback filtering improved review signal quality by increasing high-value comments from 30% to 80%.
 
 ## Testing
 
